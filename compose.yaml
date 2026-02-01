@@ -1,0 +1,11 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        UID: 1000
+        GID: 1000
+    volumes:
+      - ./pencil-sketch-fastapi:/app
+    stdin_open: true
+    tty: true
