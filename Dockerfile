@@ -1,29 +1,36 @@
-FROM python:3.14-slim
+# Base image
+FROM python:3.14-slim as base
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV PATH="$PATH:/home/appuser/.local/bin"
 
-RUN mkdir /build
-COPY requirements.txt /build
+WORKDIR /build
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN mkdir /app
-COPY ./app /app
+WORKDIR /app
+
+# Developement stage
+FROM base as development
 
 ARG UID
 ARG GID
 
-RUN groupadd -g ${GID} appuser && \
-    useradd -u ${UID} -g ${GID} -m -s /bin/bash appuser
+RUN groupadd -g ${GID} devuser && \
+    useradd -u ${UID} -g devuser -m devuser && \
+    chown -R devuser:devuser /app
 
-RUN chown -R appuser:appuser /build
-RUN chown -R appuser:appuser /app
+USER devuser
+COPY --chown=devuser:devuser ./app .
+CMD ["fastapi", "run", "main.py", "--port", "8000", "--reload"]
+
+# Production stage
+FROM base as production
+
+RUN groupadd -r appuser && \
+    useradd -r -g appuser appuser && \
+    chown -R appuser:appuser /app
 
 USER appuser
-
-WORKDIR /build
-RUN python -m pip install --upgrade pip
-RUN python -m pip install -r requirements.txt
-
-WORKDIR /app
-CMD ["sleep", "infinity"]
+COPY --chown=appuser:appuser ./app .
+CMD ["fastapi", "run", "main.py", "--port", "8000"]

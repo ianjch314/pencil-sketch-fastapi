@@ -1,11 +1,12 @@
 services:
-  app:
+  api:
     build:
       context: .
+      target: development
       args:
-        UID: 1000
-        GID: 1000
+        - UID=1000
+        - GID=1000
     volumes:
-      - ./pencil-sketch-fastapi:/app
-    stdin_open: true
-    tty: true
+      - ./app:/app
+    ports:
+      - "8000:8000"
