@@ -1,1 +1,7 @@
-app/processed_img/*
+app/processed_img/*.jpg
+app/processed_img/*.jpeg
+app/processed_img/*.png
+app/processed_img/*.gif
+app/processed_img/*.bmp
+app/processed_img/*.tiff
+app/processed_img/*.webp
